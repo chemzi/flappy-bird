@@ -10,9 +10,9 @@
   const H = canvas.height;
   const GROUND_Y = H - 96;
 
-  // 物理参数（已调低难度，更适合休闲游玩）
-  const GRAVITY = 0.30; // 重力：更小，下落更慢
-  const FLAP = -6.5;    // 拍翅：力度更柔和，滞空更久
+  // 物理参数（轻松休闲手感：拍翅幅度小、下落平缓）
+  const GRAVITY = 0.22; // 重力：更小，下落更慢更柔
+  const FLAP = -4.5;    // 拍翅：幅度小，每次只小幅上升，不再猛蹿
   const PIPE_W = 56;
   const GAP = 165;      // 管道缝隙：更宽
   const PIPE_INTERVAL = 140; // 帧数：管道更稀疏
