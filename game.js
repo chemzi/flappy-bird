@@ -105,40 +105,58 @@
   startBtn.addEventListener("click", start);
 
   function drawBird() {
+    const r = bird.r;
     ctx.save();
     ctx.translate(bird.x, bird.y);
     ctx.rotate(bird.rot);
-    // 身体
-    ctx.fillStyle = "#ffd24a";
-    ctx.beginPath();
-    ctx.arc(0, 0, bird.r, 0, Math.PI * 2);
-    ctx.fill();
+
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2;
-    ctx.stroke();
-    // 翅膀
-    ctx.fillStyle = "#fff";
+
+    // 耳朵
+    ctx.fillStyle = "#f7a8c4";
     ctx.beginPath();
-    ctx.ellipse(-4, 4, 7, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(-r * 0.55, -r * 0.7, r * 0.32, r * 0.42, -0.5, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(r * 0.35, -r * 0.8, r * 0.32, r * 0.42, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 头
+    ctx.fillStyle = "#f7a8c4";
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 猪鼻
+    ctx.fillStyle = "#ef8aae";
+    ctx.beginPath();
+    ctx.ellipse(r * 0.55, r * 0.1, r * 0.45, r * 0.32, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // 鼻孔
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(r * 0.45, r * 0.1, r * 0.07, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(r * 0.7, r * 0.1, r * 0.07, 0, Math.PI * 2);
+    ctx.fill();
+
     // 眼睛
     ctx.fillStyle = "#fff";
     ctx.beginPath();
-    ctx.arc(7, -5, 5, 0, Math.PI * 2);
+    ctx.arc(r * 0.2, -r * 0.35, r * 0.28, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
     ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.arc(9, -5, 2.5, 0, Math.PI * 2);
+    ctx.arc(r * 0.28, -r * 0.35, r * 0.13, 0, Math.PI * 2);
     ctx.fill();
-    // 嘴
-    ctx.fillStyle = "#ff7f2a";
-    ctx.beginPath();
-    ctx.moveTo(bird.r - 2, -2);
-    ctx.lineTo(bird.r + 8, 0);
-    ctx.lineTo(bird.r - 2, 3);
-    ctx.closePath();
-    ctx.fill();
+
     ctx.restore();
   }
 
