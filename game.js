@@ -10,13 +10,15 @@
   const H = canvas.height;
   const GROUND_Y = H - 96;
 
-  // 物理参数（轻松休闲手感：拍翅幅度小、下落平缓）
-  const GRAVITY = 0.22; // 重力：更小，下落更慢更柔
-  const FLAP = -4.5;    // 拍翅：幅度小，每次只小幅上升，不再猛蹿
+  // 物理参数：让起跳更干脆、下落更有重量，但不至于太难控
+  const GRAVITY = 0.24;
+  const FLAP = -4.9;
+  const MAX_FALL_SPEED = 6.8;
+  const MAX_RISE_SPEED = -5.6;
   const PIPE_W = 56;
-  const GAP = 165;      // 管道缝隙：更宽
-  const PIPE_INTERVAL = 140; // 帧数：管道更稀疏
-  const SPEED = 1.6;    // 移动速度：更慢
+  const GAP = 164;
+  const PIPE_INTERVAL = 138;
+  const SPEED = 1.78;
 
   const bird = {
     x: 90,
@@ -43,11 +45,7 @@
   }
 
   function spawnPipe() {
-    const margin = 50;
-    const minTop = margin;
-    const maxTop = GROUND_Y - GAP - margin;
-    const top = minTop + Math.random() * (maxTop - minTop);
-    pipes.push({ x: W, top, passed: false });
+    pipes.push({ x: W, top: getPipeTop(), passed: false });
   }
 
   function flap() {
@@ -82,6 +80,7 @@
        <p class="best">最高分: ${best}</p>
        <button id="startBtn">再来一次</button>`
     );
+    // overlay 内容会被替换，所以这里重新绑定一次按钮
     document.getElementById("startBtn").addEventListener("click", start);
   }
 
@@ -97,12 +96,26 @@
       flap();
     }
   });
-  canvas.addEventListener("mousedown", flap);
-  canvas.addEventListener("touchstart", (e) => {
+  canvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     flap();
-  }, { passive: false });
+  });
   startBtn.addEventListener("click", start);
+
+  function getPipeTop() {
+    const margin = 50;
+    const minTop = margin;
+    const maxTop = GROUND_Y - GAP - margin;
+    return minTop + Math.random() * (maxTop - minTop);
+  }
+
+  function isBirdHitPipe(p) {
+    return (
+      bird.x + bird.r > p.x &&
+      bird.x - bird.r < p.x + PIPE_W &&
+      (bird.y - bird.r < p.top || bird.y + bird.r > p.top + GAP)
+    );
+  }
 
   function drawBird() {
     const r = bird.r;
@@ -165,14 +178,14 @@
     ctx.strokeStyle = "#3c8a26";
     ctx.lineWidth = 2;
     for (const p of pipes) {
-      // 上管道
+      const bottomY = p.top + GAP;
+      const pipeBottomH = GROUND_Y - bottomY;
+
+      // 上、下管道与管口分开绘制，避免重复计算
       ctx.fillRect(p.x, 0, PIPE_W, p.top);
       ctx.strokeRect(p.x, 0, PIPE_W, p.top);
-      // 下管道
-      const bottomY = p.top + GAP;
-      ctx.fillRect(p.x, bottomY, PIPE_W, GROUND_Y - bottomY);
-      ctx.strokeRect(p.x, bottomY, PIPE_W, GROUND_Y - bottomY);
-      // 管口
+      ctx.fillRect(p.x, bottomY, PIPE_W, pipeBottomH);
+      ctx.strokeRect(p.x, bottomY, PIPE_W, pipeBottomH);
       ctx.fillRect(p.x - 4, p.top - 18, PIPE_W + 8, 18);
       ctx.strokeRect(p.x - 4, p.top - 18, PIPE_W + 8, 18);
       ctx.fillRect(p.x - 4, bottomY, PIPE_W + 8, 18);
@@ -202,11 +215,14 @@
   function update() {
     if (state !== "playing") return;
     frame++;
-    bird.vy += GRAVITY;
+    bird.vy = Math.min(MAX_FALL_SPEED, bird.vy + GRAVITY);
+    bird.vy = Math.max(MAX_RISE_SPEED, bird.vy);
     bird.y += bird.vy;
-    bird.rot = Math.max(-0.4, Math.min(1.4, bird.vy / 12));
+    bird.rot = Math.max(-0.55, Math.min(1.45, bird.vy / 10));
 
-    if (frame % PIPE_INTERVAL === 0) spawnPipe();
+    if (frame % PIPE_INTERVAL === 0) {
+      spawnPipe();
+    }
 
     for (const p of pipes) {
       p.x -= SPEED;
@@ -214,12 +230,7 @@
         p.passed = true;
         score++;
       }
-      // 碰撞检测
-      if (
-        bird.x + bird.r > p.x &&
-        bird.x - bird.r < p.x + PIPE_W &&
-        (bird.y - bird.r < p.top || bird.y + bird.r > p.top + GAP)
-      ) {
+      if (isBirdHitPipe(p)) {
         die();
       }
     }
